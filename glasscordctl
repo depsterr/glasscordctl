@@ -87,16 +87,18 @@ check_deps () {
 
 download_asar () {
 	case "${DOWNLOAD_METHOD}" in
-		release)
-			curl `latest_zip_link` -sLo "/tmp/glasscord.zip"
-			unzip "/tmp/glasscord.zip"
-			cd /tmp/AryToNex-Glasscord*/
-			npm install
-			mv "./glasscord.asar" "${2}"
-			rm "/tmp/glasscord.zip" /tmp/AryToNeX-Glasscord*/ -rf
+		build)
+			curl `latest_zip_link` -sLo "/tmp/glasscord.zip" &&\
+				cd /tmp &&\
+				unzip "/tmp/glasscord.zip" &&\
+				cd "`ls | grep 'AryToNeX-Glasscord'`" &&\
+				npm install &&\
+				mv "./glasscord.asar" "${1}" &&\
+				cd ..
+			rm "/tmp/glasscord.zip" "`ls | grep 'AryToNeX-Glasscord'`" -rf
 			;;
 		*)
-			curl `latest_release_link` -sLo "${2}"
+			curl `latest_release_link` -sLo "${1}"
 			;;
 	esac
 }
@@ -128,10 +130,13 @@ update () {
 
 	if [[ `used_glasscord_version` != `latest_glasscord_version` ]]; then
 		echo "Downloading latest release of Glasscord."
-		curl `latest_release_link` -sLo "${GLASSCORD_PATH}/glasscord.asar" &&\
-		echo `latest_glasscord_version` > "${GLASSCORD_VERSION_FILE}" || {
+		curl `latest_release_link` -sLo "${GLASSCORD_PATH}/glasscord.asar"
+	    [ ! -f "${GLASSCORD_PATH}/glasscord.asar" ] && {
 			echo "Update failed, if you can no longer launch the older version, please uninstall and install Glasscord"
+			exit
 		}
+		echo `latest_glasscord_version` > "${GLASSCORD_VERSION_FILE}"
+		echo "Updated Glasscord"
 	else
 		echo "Already installed latest Glasscord version."
 	fi
@@ -144,16 +149,18 @@ install () {
 	fi
 
 	if [ ! -d "${GLASSCORD_PATH}" ]; then
+		echo "Starting install"
 		mkdir -p "${GLASSCORD_PATH}"
-		download_asar "${GLASSCORD_PATH}/glasscord.asar" &&\
-		install_to `latest_discord_version` &&\
-		latest_discord_version > "${USED_DISCORD_VERSION_FILE}" &&\
-		`latest_glasscord_version` > "${GLASSCORD_VERSION_FILE}" || {
+		download_asar "${GLASSCORD_PATH}/glasscord.asar"
+	    [ ! -f "${GLASSCORD_PATH}/glasscord.asar" ] && {
 			echo "Installation failed, removing files."
 			uninstall
 			exit
 		}
-		echo "Sucessfully updated Glasscord"
+		install_to `latest_discord_version`
+		latest_discord_version > "${USED_DISCORD_VERSION_FILE}"
+		latest_glasscord_version > "${GLASSCORD_VERSION_FILE}"
+		echo "Sucessfully installed Glasscord"
 	else
 		echo "Already installed"
 	fi
