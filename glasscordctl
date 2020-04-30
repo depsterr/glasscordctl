@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
+#
 # Constants
+#
 VERSION=0.0.2
 DISCORD_PATH="${HOME}/.config/discord"
 
+#
 # Internal vars
+#
 GLASSCORD_PATH="${DISCORD_PATH}/glasscord"
 USED_DISCORD_VERSION_FILE="${GLASSCORD_PATH}/used_discord_version"
 GLASSCORD_VERSION_FILE="${GLASSCORD_PATH}/glasscord_version"
@@ -24,7 +28,9 @@ options:
     | Print info:               | info       --info       -i  |
     ==========================================================="
 
-# Info functions
+#
+# Info retrieval functions
+#
 latest_release_link () {
 	curl "https://api.github.com/repos/AryToNex/Glasscord/releases/latest" -s | awk '/browser_download_url/ { print $2 }' | cut -d '"' -f 2
 }
@@ -49,7 +55,25 @@ used_discord_version () {
 	cat "${USED_DISCORD_VERSION_FILE}"
 }
 
+#
 # Internal functions
+#
+check_deps () {
+	which curl &>/dev/null || {
+		echo "Please install curl"
+		missing="curl"
+	}
+	which awk &>/dev/null || {
+		echo "Please install awk"
+		missing="${missing} awk"
+	}
+	which sed &>/dev/null || {
+		echo "Please install sed"
+		missing="${missing} sed"
+	}
+	[ -z "${missing}" ] || exit
+}
+
 install_to () {
 	newdir=`find "${DISCORD_PATH}/${1}" -type d -name 'discord_desktop_core' | sed '1q'`
 	echo "require('${GLASSCORD_PATH}/glasscord.asar')" | cat - "${newdir}/index.js" > "/tmp/index.js"
@@ -115,7 +139,11 @@ uninstall () {
 	fi
 }
 
+check_deps
+
+#
 # Args
+#
 case $1 in
 	update|--update|-U)
 		update
