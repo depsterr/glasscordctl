@@ -19,8 +19,8 @@ options:
     ===========================================================
     | Functionallity            | Word / flag alternatives    |
     ===========================================================
-    | Update your installation: | update     --update     -U  |
     | Install Glasscord:        | install    --install    -I  |
+    | Update your installation: | update     --update     -U  |
     | Uninstall Glasscord:      | uninstall  --uninstall  -R  |
     | Reinstall Glasscord:      | reinstall  --reinsatll  -r  |
     | Print this message:       | help       --help       -h  |
