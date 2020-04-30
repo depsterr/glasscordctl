@@ -44,11 +44,11 @@ used_glasscord_version () {
 }
 
 discord_versions () {
-	ls ${DISCORD_PATH} -l | awk '/[0-9]+\.[0-9]+\.[0-9]+/ { print $9 }'
+	ls "${DISCORD_PATH}" | awk '/[0-9]+\.[0-9]+\.[0-9]+/ { print $1 }'
 }
 
 latest_discord_version () {
-	discord_versions | sort -nr | sed '1q'
+	discord_versions | sort -nr | sed "1q"
 }
 
 used_discord_version () {
@@ -75,7 +75,7 @@ check_deps () {
 }
 
 install_to () {
-	newdir=`find "${DISCORD_PATH}/${1}" -type d -name 'discord_desktop_core' | sed '1q'`
+	newdir=`find "${DISCORD_PATH}/${1}" -type d -name "discord_desktop_core" | sed "1q"`
 	echo "require('${GLASSCORD_PATH}/glasscord.asar')" | cat - "${newdir}/index.js" > "/tmp/index.js"
 	cat "/tmp/index.js" > "${newdir}/index.js"
 	rm "/tmp/index.js"
@@ -106,12 +106,12 @@ update () {
 }
 
 install () {
-	if [ ! -d ${DISCORD_PATH} ]; then
+	if [ ! -d "${DISCORD_PATH}" ]; then
 		echo "Your discord directory doesn't seem to exist, if you are sure you have discord installed, please find it's config directory, then edit the variable called 'DISCORD_PATH' at the top of this file to match it"
 		exit
 	fi
 
-	if [ ! -d ${GLASSCORD_PATH} ]; then
+	if [ ! -d "${GLASSCORD_PATH}" ]; then
 		mkdir -p "${GLASSCORD_PATH}"
 		curl `latest_release_link` -sLo "${GLASSCORD_PATH}/glasscord.asar" &&\
 		install_to `latest_discord_version` &&\
@@ -128,9 +128,9 @@ install () {
 }
 
 uninstall () {
-	if [ -d ${GLASSCORD_PATH} ]; then
+	if [ -d "${GLASSCORD_PATH}" ]; then
 		for version in `discord_versions`; do
-			uninstall_from ${version}
+			uninstall_from "${version}"
 		done
 		rm "${GLASSCORD_PATH}"
 		echo "Sucessfully uninstalled Glasscord"
@@ -144,7 +144,7 @@ check_deps
 #
 # Args
 #
-case $1 in
+case "${1}" in
 	update|--update|-U)
 		update
 		;;
