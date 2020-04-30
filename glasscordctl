@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
 
 # Constants
-VERSION=0.0.1
+VERSION=0.0.2
 DISCORD_PATH="${HOME}/.config/discord"
+
+# Internal vars
 GLASSCORD_PATH="${DISCORD_PATH}/glasscord"
 USED_DISCORD_VERSION_FILE="${GLASSCORD_PATH}/used_discord_version"
 GLASSCORD_VERSION_FILE="${GLASSCORD_PATH}/glasscord_version"
+HELPMSG="glasscordctl version ${VERSION}
 
-HELPMSG="Glasscordctl version ${VERSION}\n\ninstall - installs glasscord\nupdate - updates an installation\nuninstall - uninstalls glasscord\nreinstall - uninstalls and then installs glasscord\nhelp - shows this message\nversion - prints the version of this script\ninfo - print info about install"
+options:
 
+    ===========================================================
+    | Functionallity            | Word / flag alternatives    |
+    ===========================================================
+    | Update your installation: | update     --update     -U  |
+    | Install Glasscord:        | install    --install    -I  |
+    | Uninstall Glasscord:      | uninstall  --uninstall  -R  |
+    | Reinstall Glasscord:      | reinstall  --reinsatll  -r  |
+    | Print this message:       | help       --help       -h  |
+    | Print the version:        | version    --version    -v  |
+    | Print info:               | info       --info       -i  |
+    ==========================================================="
+
+# Info functions
 latest_release_link () {
 	curl "https://api.github.com/repos/AryToNex/Glasscord/releases/latest" -s | awk '/browser_download_url/ { print $2 }' | cut -d '"' -f 2
 }
@@ -21,22 +37,19 @@ used_glasscord_version () {
 	cat "${GLASSCORD_VERSION_FILE}"
 }
 
-# Gives you the latest version of discord
 discord_versions () {
 	ls ${DISCORD_PATH} -l | awk '/[0-9]+\.[0-9]+\.[0-9]+/ { print $9 }'
 }
 
-# Gives you the latest version of discord
 latest_discord_version () {
 	discord_versions | sort -nr | sed '1q'
 }
 
-# Gives you the used version of discord
 used_discord_version () {
 	cat "${USED_DISCORD_VERSION_FILE}"
 }
 
-# Takes 1 arg an installs to that dir
+# Internal functions
 install_to () {
 	newdir=`find "${DISCORD_PATH}/${1}" -type d -name 'discord_desktop_core' | sed '1q'`
 	echo "require('${GLASSCORD_PATH}/glasscord.asar')" | cat - "${newdir}/index.js" > "/tmp/index.js"
@@ -44,14 +57,8 @@ install_to () {
 	rm "/tmp/index.js"
 }
 
-# Check if it should move to another directory
 update () {
-	if [ ! -f "${USED_DISCORD_VERSION_FILE}" ]; then
-		echo "Can't update before install"
-		return
-	fi
-
-	if [ ! -f "${GLASSCORD_PATH}/glasscord.asar" ]; then
+	if [ ! -d "${GLASSCORD_PATH}" ]; then
 		echo "Can't update before install"
 		return
 	fi
@@ -108,31 +115,36 @@ uninstall () {
 	fi
 }
 
+# Args
 case $1 in
-	update)
+	update|--update|-U)
 		update
 		;;
-	install)
+	install|--install|-I)
 		install
 		;;
-	uninstall)
+	uninstall|--uninstall|-R)
 		uninstall
 		;;
-	reinstall)
+	reinstall|--reinsatll|-r)
 		uninstall
 		install
 		;;
-	help)
+	help|--help|-h)
 		echo -e "${HELPMSG}"
 		;;
-	version)
+	version|--version|-v)
 		echo -e "${VERSION}"
 		;;
-	info)
+	info|--info|-i)
 		if [ -d ${GLASSCORD_PATH} ]; then
 			echo -e "Discord version: `used_discord_version` Glasscord version: `used_glasscord_version`"
 		else
 			echo "Glasscord is not installed"
 		fi
+		;;
+	*)
+		echo -e "${HELPMSG}"
+		exit 1
 		;;
 esac
