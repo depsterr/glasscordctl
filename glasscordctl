@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+# Constants
+VERSION=0.0.1
+DISCORD_PATH="${HOME}/.config/discord"
+GLASSCORD_PATH="${DISCORD_PATH}/glasscord"
+
+HELPMSG="Glasscordctl version ${VERSION}\n\ninstall - installs glasscord\nupdate - updates an installation\nuninstall - uninstalls glasscord"
+
+# Make sure info files exist
+[ -d "${GLASSCORD_PATH}" ] || mkdir -p "${GLASSCORD_PATH}"
+
+# Gives you the link to the latest release
+latest_release_link () {
+	echo "https://github.com/AryToNeX/Glasscord/releases/download/v0.0.6/glasscord.asar"
+	# echo https://github.com$(curl https://github.com/AryToNeX/Glasscord/releases/latest -L &>/dev/null | grep '\.asar' | sed '1q' | cut -d '"' -f 2)
+}
+
+
+# Gives you the latest version of discord
+discord_versions () {
+	ls ${DISCORD_PATH} -l | awk '/[0-9]+\.[0-9]+\.[0-9]+/ { print $9 }'
+}
+
+# Gives you the latest version of discord
+latest_discord_version () {
+	discord_versions | sort -nr | sed '1q'
+}
+
+# Gives you the used version of discord
+used_discord_version () {
+	cat "${GLASSCORD_PATH}/used_discord_version"
+}
+
+# Takes 1 arg an installs to that dir
+install_to () {
+	newdir=`find "${DISCORD_PATH}/${1}" -type d -name 'discord_desktop_core' | sed '1q'`
+	echo "require('${GLASSCORD_PATH}/glasscord.asar')" | cat - "${newdir}/index.js" > "/tmp/index.js"
+	cat "/tmp/index.js" > "${newdir}/index.js"
+	rm "/tmp/index.js"
+}
+
+# Takes 1 arg and removes from that dir
+uninstall_from () {
+	olddir=`find "${DISCORD_PATH}/${1}" -type d -name 'discord_desktop_core' | sed '1q'`
+	sed -i "/glasscord/d" "${olddir}/index.js"	
+}
+
+# Takes 2 args, both discord versions. It then moves glasscord.asar from $1 to $2
+switch_discord_version () {
+	uninstall_from $1
+	install_to $2
+}
+
+update () {
+	if [ ! -f "${GLASSCORD_PATH}/used_discord_version" ]; then
+		echo "Can't update before install"
+		return
+	fi
+
+	if [ ! -f "${GLASSCORD_PATH}/glasscord.asar" ]; then
+		echo "Can't update before install"
+		return
+	fi
+
+	if [[ `used_discord_version` != `latest_discord_version` ]]; then
+		echo "Installing for latest discord version"
+		switch_discord_versions `used_discord_version` `latest_discord_version`
+	else
+		echo "Already installed for latest discord version"
+	fi
+}
+
+install () {
+	curl `latest_release_link` -o "${GLASSCORD_PATH}/glasscord.asar"
+	install_to `latest_discord_version`
+	latest_discord_version > "${GLASSCORD_PATH}/used_discord_version"
+}
+
+uninstall () {
+	for version in `discord_versions`; do
+		uninstall_from ${version}
+	done
+	rm "${GLASSCORD_PATH}/glasscord.asar" "${GLASSCORD_PATH}/used_discord_version"
+}
+
+case $1 in
+	update)
+		update
+		;;
+	install)
+		install
+		;;
+	uninstall)
+		uninstall
+		;;
+	help)
+		echo -e ${HELPMSG}
+		;;
+esac
