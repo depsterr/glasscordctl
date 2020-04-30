@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 #
-# Constants
+# Options
 #
-VERSION=0.0.2
 DISCORD_PATH="${HOME}/.config/discord"
+DOWNLOAD_METHOD="binary" # binary or build
 
 #
 # Internal vars
 #
+VERSION=0.0.2
 GLASSCORD_PATH="${DISCORD_PATH}/glasscord"
 USED_DISCORD_VERSION_FILE="${GLASSCORD_PATH}/used_discord_version"
 GLASSCORD_VERSION_FILE="${GLASSCORD_PATH}/glasscord_version"
@@ -33,6 +34,10 @@ options:
 #
 latest_release_link () {
 	curl "https://api.github.com/repos/AryToNex/Glasscord/releases/latest" -s | awk '/browser_download_url/ { print $2 }' | cut -d '"' -f 2
+}
+
+latest_zip_link () {
+	curl "https://api.github.com/repos/AryToNex/Glasscord/releases/latest" -s | awk '/zipball_url/ { print $2 }' | cut -d '"' -f 2
 }
 
 latest_glasscord_version () {
@@ -71,7 +76,29 @@ check_deps () {
 		echo "Please install sed"
 		missing="${missing} sed"
 	}
+	if [[ "${DOWNLOAD_METHOD}" == "build" ]]; then
+		which npm &>/dev/null || {
+			echo "Please install npm for building from source"
+			missing="${missing} sed"
+		}
+	fi
 	[ -z "${missing}" ] || exit
+}
+
+download_asar () {
+	case "${DOWNLOAD_METHOD}" in
+		release)
+			curl `latest_zip_link` -sLo "/tmp/glasscord.zip"
+			unzip "/tmp/glasscord.zip"
+			cd /tmp/AryToNex-Glasscord*/
+			npm install
+			mv "./glasscord.asar" "${2}"
+			rm "/tmp/glasscord.zip" /tmp/AryToNeX-Glasscord*/ -rf
+			;;
+		*)
+			curl `latest_release_link` -sLo "${2}"
+			;;
+	esac
 }
 
 install_to () {
@@ -79,6 +106,11 @@ install_to () {
 	echo "require('${GLASSCORD_PATH}/glasscord.asar')" | cat - "${newdir}/index.js" > "/tmp/index.js"
 	cat "/tmp/index.js" > "${newdir}/index.js"
 	rm "/tmp/index.js"
+}
+
+uninstall_from () {
+	newdir=`find "${DISCORD_PATH}/${1}" -type d -name "discord_desktop_core" | sed "1q"`
+	sed -i "/glasscord/d" "${newdir}/index.js"
 }
 
 update () {
@@ -113,7 +145,7 @@ install () {
 
 	if [ ! -d "${GLASSCORD_PATH}" ]; then
 		mkdir -p "${GLASSCORD_PATH}"
-		curl `latest_release_link` -sLo "${GLASSCORD_PATH}/glasscord.asar" &&\
+		download_asar "${GLASSCORD_PATH}/glasscord.asar" &&\
 		install_to `latest_discord_version` &&\
 		latest_discord_version > "${USED_DISCORD_VERSION_FILE}" &&\
 		`latest_glasscord_version` > "${GLASSCORD_VERSION_FILE}" || {
@@ -132,7 +164,7 @@ uninstall () {
 		for version in `discord_versions`; do
 			uninstall_from "${version}"
 		done
-		rm "${GLASSCORD_PATH}"
+		rm "${GLASSCORD_PATH}" -rf
 		echo "Sucessfully uninstalled Glasscord"
 	else
 		echo "Glasscord is not installed"
