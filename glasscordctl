@@ -205,7 +205,7 @@ case "${1}" in
 		;;
 	info|--info|-i)
 		if [ -d ${GLASSCORD_PATH} ]; then
-			echo -e "Discord version: `used_discord_version` Glasscord version: `used_glasscord_version`"
+			echo -e "Discord version: `used_discord_version` Glasscord version: `used_glasscord_version` Download option: ${DOWNLOAD_METHOD} Discord directory: ${DISCORD_PATH}"
 		else
 			echo "Glasscord is not installed"
 		fi
