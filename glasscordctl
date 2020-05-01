@@ -3,7 +3,11 @@
 #
 # Options
 #
-DOWNLOAD_METHOD="binary" # binary or build
+
+# Set to binary to install binary (faster) or build to build from source (requires npm)
+DOWNLOAD_METHOD="binary"
+# This is where glasscordctl looks for discord config folders, if multiple ones are found the last one is used.
+DISCORD_PATHS=("${HOME}/.var/app/com.discordapp.Discord/config/discord" "${HOME}/snap/discord/current/.config/discord" "${HOME}/.config/discord" )
 
 #
 # Internal vars
@@ -50,9 +54,8 @@ used_glasscord_version () {
 }
 
 used_discord_path () {
-	paths=("${HOME}/.config/discord" "${HOME}/snap/discord/current/.config/discord" "${HOME}/.var/app/com.discordapp.Discord/config/discord")
 	used_path=""
-	for path in "${paths}"; do
+	for path in "${DISCORD_PATHS}"; do
 		[ -d "${path}" ] && used_path="${path}"
 	done
 	[ -z "${used_path}" ] && {
