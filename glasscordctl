@@ -3,16 +3,17 @@
 #
 # Options
 #
-DISCORD_PATH="${HOME}/.config/discord"
 DOWNLOAD_METHOD="binary" # binary or build
 
 #
 # Internal vars
 #
 VERSION=0.0.2
-GLASSCORD_PATH="${DISCORD_PATH}/glasscord"
+# DISCORD_PATH="`get_discord_path`" has to be run after function is defined
+GLASSCORD_PATH="${HOME}/.config/glasscord"
 USED_DISCORD_VERSION_FILE="${GLASSCORD_PATH}/used_discord_version"
 GLASSCORD_VERSION_FILE="${GLASSCORD_PATH}/glasscord_version"
+USED_DISCORD_PATH_FILE="${GLASSCORD_PATH}/used_discord_path"
 HELPMSG="glasscordctl version ${VERSION}
 
 options:
@@ -47,6 +48,21 @@ latest_glasscord_version () {
 used_glasscord_version () {
 	cat "${GLASSCORD_VERSION_FILE}"
 }
+
+used_discord_path () {
+	paths=("${HOME}/.config/discord" "${HOME}/snap/discord/current/.config/discord" "${HOME}/.var/app/com.discordapp.Discord/config/discord")
+	used_path=""
+	for path in "${paths}"; do
+		[ -d "${path}" ] && used_path="${path}"
+	done
+	[ -z "${used_path}" ] && {
+		echo "No discord folder detected in ${paths}, are you sure you have discord installed?"
+		exit
+	}
+	echo "${used_path}"
+}
+
+DISCORD_PATH="`used_discord_path`"
 
 discord_versions () {
 	ls "${DISCORD_PATH}" | awk '/[0-9]+\.[0-9]+\.[0-9]+/ { print $1 }'
@@ -205,7 +221,7 @@ case "${1}" in
 		;;
 	info|--info|-i)
 		if [ -d ${GLASSCORD_PATH} ]; then
-			echo -e "Discord version: `used_discord_version` Glasscord version: `used_glasscord_version` Download option: ${DOWNLOAD_METHOD} Discord directory: ${DISCORD_PATH}"
+			echo -e "Discord version: `used_discord_version`\nGlasscord version: `used_glasscord_version`\nDownload option: ${DOWNLOAD_METHOD}\nDiscord directory: ${DISCORD_PATH}"
 		else
 			echo "Glasscord is not installed"
 		fi
