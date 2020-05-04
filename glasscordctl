@@ -229,6 +229,9 @@ case "${1}" in
 			echo "Glasscord is not installed"
 		fi
 		;;
+	--debug)
+		$2
+		;;
 	*)
 		echo -e "${HELPMSG}"
 		exit 1
