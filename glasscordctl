@@ -55,11 +55,11 @@ used_glasscord_version () {
 
 used_discord_path () {
 	used_path=""
-	for path in "${DISCORD_PATHS}"; do
+	for path in "${DISCORD_PATHS[@]}"; do
 		[ -d "${path}" ] && used_path="${path}"
 	done
 	[ -z "${used_path}" ] && {
-		echo "No discord folder detected in ${paths}, are you sure you have discord installed?"
+		echo "No discord folder detected in ${DISCORD_PATHS[@]}, are you sure you have discord installed?"
 		exit
 	}
 	echo "${used_path}"

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+DISCORD_PATHS=("${HOME}/.var/app/com.discordapp.Discord/config/discord" "${HOME}/snap/discord/current/.config/discord" "${HOME}/.config/discord" )
+for path in ${DISCORD_PATHS[@]}; do
+	echo "${path}"
+	[ -d "${path}" ] && used_path="${path}"
+done
+echo "${used_path}"
