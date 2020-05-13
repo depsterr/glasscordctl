@@ -23,7 +23,7 @@ HELPMSG="glasscordctl version ${VERSION}
 options:
 
     ===========================================================
-    | Functionallity            | Word / flag alternatives    |
+    | Functionality             | Word / flag alternatives    |
     ===========================================================
     | Install Glasscord:        | install    --install    -I  |
     | Update your installation: | update     --update     -U  |
@@ -55,11 +55,11 @@ used_glasscord_version () {
 
 used_discord_path () {
 	used_path=""
-	for path in "${DISCORD_PATHS}"; do
+	for path in "${DISCORD_PATHS[@]}"; do
 		[ -d "${path}" ] && used_path="${path}"
 	done
 	[ -z "${used_path}" ] && {
-		echo "No discord folder detected in ${paths}, are you sure you have discord installed?"
+		echo "No discord folder detected in ${DISCORD_PATHS[@]}, are you sure you have discord installed?"
 		exit
 	}
 	echo "${used_path}"
@@ -102,6 +102,13 @@ check_deps () {
 		}
 	fi
 	[ -z "${missing}" ] || exit
+}
+
+check_network () {
+	[ -z "`curl -s duckduckgo.com`" ] && {
+		echo "Please make sure you are connected to the internet and try again."
+		exit
+	}
 }
 
 download_asar () {
@@ -179,7 +186,7 @@ install () {
 		install_to `latest_discord_version`
 		latest_discord_version > "${USED_DISCORD_VERSION_FILE}"
 		latest_glasscord_version > "${GLASSCORD_VERSION_FILE}"
-		echo "Sucessfully installed Glasscord"
+		echo "Successfully installed Glasscord"
 	else
 		echo "Already installed"
 	fi
@@ -191,7 +198,7 @@ uninstall () {
 			uninstall_from "${version}"
 		done
 		rm "${GLASSCORD_PATH}" -rf
-		echo "Sucessfully uninstalled Glasscord"
+		echo "Successfully uninstalled Glasscord"
 	else
 		echo "Glasscord is not installed"
 	fi
@@ -204,15 +211,18 @@ check_deps
 #
 case "${1}" in
 	update|--update|-U)
+		check_network
 		update
 		;;
 	install|--install|-I)
+		check_network
 		install
 		;;
 	uninstall|--uninstall|-R)
 		uninstall
 		;;
 	reinstall|--reinsatll|-r)
+		check_network
 		uninstall
 		install
 		;;
@@ -228,6 +238,9 @@ case "${1}" in
 		else
 			echo "Glasscord is not installed"
 		fi
+		;;
+	--debug)
+		$2
 		;;
 	*)
 		echo -e "${HELPMSG}"

@@ -1,6 +1,6 @@
 # glasscordctl
 
-glasscordctl is a terminal managment tool for glasscord
+glasscordctl is a terminal managment tool for glasscord that lets you install, and update glasscord.
 
 ## usage
 
