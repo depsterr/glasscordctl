@@ -1,46 +1,50 @@
-# glasscordctl
+# THIS PROJECT USES THE OLD INJECTION METHOD, PLEASE CHECKOUT GLASSCORD AND GLASSCORDIFY FOR UP TO DATE INFO.
+
+*though you might still be able to use this if you wish to attempt to do so.*
+
+## glasscordctl
 
 glasscordctl is a terminal managment tool for glasscord that lets you install, and update glasscord.
 
-## usage
+### usage
 
-### Install Glasscord:
+#### Install Glasscord:
 
 ```bash
 glasscordctl --install
 ```
 
-### Update your installation:
+#### Update your installation:
 
 ```bash
 glasscordctl --update
 ```
 
-### Uninstall Glasscord:
+#### Uninstall Glasscord:
 
 ```bash
 glasscordctl --uninstall
 ```
 
-### Reinstall Glasscord:
+#### Reinstall Glasscord:
 
 ```bash
 glasscordctl --reinsatll
 ```
 
-### Print this message:
+#### Print this message:
 
 ```bash
 glasscordctl --help
 ```
 
-### Print the version:
+#### Print the version:
 
 ```bash
 glasscordctl --version
 ```
 
-### Print info:
+#### Print info:
 
 ```bash
 glasscordctl --info
